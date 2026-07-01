@@ -1,3 +1,4 @@
 .idea/
 .vscode/
 fmk/*.bin
+fmk/*.bin-bootldr
