@@ -1,16 +1,15 @@
 
-Scan Time:     2026-07-01 20:46:41
-Target File:   /home/manuel/Documenti/universita/iot-security/progetto/firmware_originale.bin
-MD5 Checksum:  900dbd126e377438b3456b847421d632
+Scan Time:     2026-07-02 15:56:57
+Target File:   /home/butterfly/Scrivania/iotSec/githubbiamo/firmware-mod-kit/mod13.bin
+MD5 Checksum:  eb3e00bc67fcc6eafce3b13e86615898
 Signatures:    344
 DECIMAL       HEXADECIMAL     DESCRIPTION
 --------------------------------------------------------------------------------
-0             0x0             TP-Link firmware header, firmware version: 0.-15766.3, image version: "", product ID: 0x0, product version: 138477576, kernel load address: 0x0, kernel entry point: 0x80002000, kernel offset: 4063744, kernel length: 512, rootfs offset: 815037, rootfs length: 1048576, bootloader offset: 2883584, bootloader length: 0
-13392         0x3450          U-Boot version string, "U-Boot 1.1.4 (Feb 10 2017 - 11:32:57)"
-13440         0x3480          CRC32 polynomial table, big endian
-14728         0x3988          uImage header, header size: 64 bytes, header CRC: 0xE8315837, created: 2017-02-10 03:32:57, image size: 35490 bytes, Data Address: 0x80010000, Entry Point: 0x80010000, data CRC: 0x9C88155B, OS: Linux, CPU: MIPS, image type: Firmware Image, compression type: lzma, image name: "u-boot image"
-14792         0x39C8          LZMA compressed data, properties: 0x5D, dictionary size: 33554432 bytes, uncompressed size: 101164 bytes
-131584        0x20200         TP-Link firmware header, firmware version: 0.0.3, image version: "", product ID: 0x0, product version: 138477576, kernel load address: 0x0, kernel entry point: 0x80002000, kernel offset: 3932160, kernel length: 512, rootfs offset: 815037, rootfs length: 1048576, bootloader offset: 2883584, bootloader length: 0
-132096        0x20400         LZMA compressed data, properties: 0x5D, dictionary size: 33554432 bytes, uncompressed size: 2325620 bytes
-1180160       0x120200        Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 2361846 bytes, 550 inodes, blocksize: 131072 bytes, created: 2017-02-10 03:42:20
+12880         0x3250          U-Boot version string, "U-Boot 1.1.4 (Apr 12 2012 - 09:57:11)"
+12928         0x3280          CRC32 polynomial table, big endian
+14216         0x3788          uImage header, header size: 64 bytes, header CRC: 0x9126C68, created: 2012-04-12 01:57:13, image size: 34077 bytes, Data Address: 0x80010000, Entry Point: 0x80010000, data CRC: 0x9A5D6085, OS: Linux, CPU: MIPS, image type: Firmware Image, compression type: lzma, image name: "u-boot image"
+14280         0x37C8          LZMA compressed data, properties: 0x5D, dictionary size: 33554432 bytes, uncompressed size: 96456 bytes
+131072        0x20000         TP-Link firmware header, firmware version: 0.0.3, image version: "", product ID: 0x0, product version: 138477576, kernel load address: 0x0, kernel entry point: 0x80002000, kernel offset: 3932160, kernel length: 512, rootfs offset: 815037, rootfs length: 1048576, bootloader offset: 2883584, bootloader length: 0
+131584        0x20200         LZMA compressed data, properties: 0x5D, dictionary size: 33554432 bytes, uncompressed size: 2325620 bytes
+1179648       0x120000        Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 2942482 bytes, 800 inodes, blocksize: 131072 bytes, created: 2026-07-02 11:42:01
 
