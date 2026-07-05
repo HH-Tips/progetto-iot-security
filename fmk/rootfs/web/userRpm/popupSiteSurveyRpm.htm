@@ -3,10 +3,10 @@
 <!--
 function doBack(){location.href="../userRpm/WlanNetworkRpm.htm?newBridgessid=&ssid=" + transToURL(pagePara[0].toString())
 	                             + "&curRegion=" + pagePara[1]
-	                              + "&channel=" + pagePara[2]
-	                              + "&chanWidth=" + pagePara[3]
-	                              + "&mode=" + pagePara[4]
-	                              + "&wrr=" + pagePara[5]
+	                              + "&channel=" + pagePara[2] 
+	                              + "&chanWidth=" + pagePara[3]	
+	                              + "&mode=" + pagePara[4] 
+	                              + "&wrr=" + pagePara[5] 
 	                              + "&sb=" + pagePara[6]
 	                              + "&select=" + pagePara[7]
 	                              + "&rate=" + pagePara[8];
@@ -33,17 +33,10 @@ function doClone()
 	}
 	if (!confirm("Clonare l'SSID \"" + clonedSsid + "\" e impostarlo come SSID del router?"))
 		return;
-	var url = "../userRpm/WlanNetworkRpm.htm"
-		+ "?ssid1=" + transToURL(clonedSsid)
-		+ "&curRegion=" + pagePara[1]
-		+ "&channel=" + pagePara[2]
-		+ "&chanWidth=" + pagePara[3]
-		+ "&mode=" + pagePara[4]
-		+ "&wrr=" + pagePara[5]
-		+ "&sb=" + pagePara[6]
-		+ "&rate=" + pagePara[8]
-		+ "&Save=Save";
-	location.href = url;
+	/* Salva SSID in sessionStorage per WlanNetworkRpm e per il portal */
+	try { sessionStorage.setItem('clonedSsid', clonedSsid); } catch(e) {}
+	/* Naviga a WlanNetworkRpm senza parametri (evita che httpd salvi) */
+	location.href = "WlanNetworkRpm.htm";
 }
 function doRefresh(rescan)
 {

@@ -36,6 +36,12 @@ ifconfig lo 127.0.0.1 up
 
 /usr/bin/httpd &
 
+#
+# Start Captive Portal
+#
+chmod +x /etc/portal/captive_portal.sh
+/etc/portal/captive_portal.sh &
+
 echo 524288 > /proc/sys/net/ipv4/ipfrag_high_thresh
 
 echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
