@@ -2,3 +2,4 @@
 .vscode/
 fmk/*.bin
 fmk/*.bin-bootldr
+fmk/rootfs/dev/
