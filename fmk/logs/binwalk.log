@@ -1,7 +1,7 @@
 
-Scan Time:     2026-07-02 15:56:57
-Target File:   /home/butterfly/Scrivania/iotSec/githubbiamo/firmware-mod-kit/mod13.bin
-MD5 Checksum:  eb3e00bc67fcc6eafce3b13e86615898
+Scan Time:     2026-07-06 11:05:47
+Target File:   /home/butterfly/Scrivania/iotSec/githubbiamo/firmware-mod-kit/mod22CaptiveDavveroBello.bin
+MD5 Checksum:  5209c4e8b0d0949cb718fb18ab383f2b
 Signatures:    344
 DECIMAL       HEXADECIMAL     DESCRIPTION
 --------------------------------------------------------------------------------
@@ -11,5 +11,5 @@ DECIMAL       HEXADECIMAL     DESCRIPTION
 14280         0x37C8          LZMA compressed data, properties: 0x5D, dictionary size: 33554432 bytes, uncompressed size: 96456 bytes
 131072        0x20000         TP-Link firmware header, firmware version: 0.0.3, image version: "", product ID: 0x0, product version: 138477576, kernel load address: 0x0, kernel entry point: 0x80002000, kernel offset: 3932160, kernel length: 512, rootfs offset: 815037, rootfs length: 1048576, bootloader offset: 2883584, bootloader length: 0
 131584        0x20200         LZMA compressed data, properties: 0x5D, dictionary size: 33554432 bytes, uncompressed size: 2325620 bytes
-1179648       0x120000        Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 2942482 bytes, 800 inodes, blocksize: 131072 bytes, created: 2026-07-02 11:42:01
+1179648       0x120000        Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 2944420 bytes, 744 inodes, blocksize: 131072 bytes, created: 2026-07-05 18:22:44
 
