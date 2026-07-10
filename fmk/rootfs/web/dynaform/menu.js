@@ -31,7 +31,6 @@ var menuList = new Array(
 	"WlanBandRpm",				0,		0,			str_menu.band,
 	"", 						0,		1, 		    str_menu.wlanMain,
 	"WlanNetworkRpm", 	    	0,		2,          str_menu.wlanNetwork,
-	"popupSiteSurveyRpm", 	    0,		2,          str_menu.ssidCloner,
 	//add by zhanglipeng 2010-01-26, For display apc router page
 	"WlanNetworkRpm_APC",			0,		2,			str_menu.wlanNetwork,
 	//end add 2010-01-26

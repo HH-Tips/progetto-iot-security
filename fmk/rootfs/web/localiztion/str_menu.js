@@ -28,7 +28,6 @@ str_menu.wlanMain						=  "Wireless";
 str_menu.workingModeRpm					=  "Working Mode";
 //end add 2010-01-06
 str_menu.wlanNetwork					=  "Wireless Settings";
-str_menu.ssidCloner					=  "SSID Cloner";
 str_menu.wlanMacFlt						=  "Wireless MAC Filtering";
 //added by zqq,07.11.22
 str_menu.wlanAdvCfg                     =  "Wireless Advanced";

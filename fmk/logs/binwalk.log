@@ -1,15 +1,11 @@
 
-Scan Time:     2026-07-06 11:05:47
-Target File:   /home/butterfly/Scrivania/iotSec/githubbiamo/firmware-mod-kit/mod22CaptiveDavveroBello.bin
-MD5 Checksum:  5209c4e8b0d0949cb718fb18ab383f2b
+Scan Time:     2026-07-10 14:16:57
+Target File:   /home/manuel/Documenti/universita/iot-security/progetto/new-firmware.bin
+MD5 Checksum:  40e2ec42fdf76a80e591bb3e04751d36
 Signatures:    344
 DECIMAL       HEXADECIMAL     DESCRIPTION
 --------------------------------------------------------------------------------
-12880         0x3250          U-Boot version string, "U-Boot 1.1.4 (Apr 12 2012 - 09:57:11)"
-12928         0x3280          CRC32 polynomial table, big endian
-14216         0x3788          uImage header, header size: 64 bytes, header CRC: 0x9126C68, created: 2012-04-12 01:57:13, image size: 34077 bytes, Data Address: 0x80010000, Entry Point: 0x80010000, data CRC: 0x9A5D6085, OS: Linux, CPU: MIPS, image type: Firmware Image, compression type: lzma, image name: "u-boot image"
-14280         0x37C8          LZMA compressed data, properties: 0x5D, dictionary size: 33554432 bytes, uncompressed size: 96456 bytes
-131072        0x20000         TP-Link firmware header, firmware version: 0.0.3, image version: "", product ID: 0x0, product version: 138477576, kernel load address: 0x0, kernel entry point: 0x80002000, kernel offset: 3932160, kernel length: 512, rootfs offset: 815037, rootfs length: 1048576, bootloader offset: 2883584, bootloader length: 0
-131584        0x20200         LZMA compressed data, properties: 0x5D, dictionary size: 33554432 bytes, uncompressed size: 2325620 bytes
-1179648       0x120000        Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 2944420 bytes, 744 inodes, blocksize: 131072 bytes, created: 2026-07-05 18:22:44
+0             0x0             TP-Link firmware header, firmware version: 0.0.3, image version: "", product ID: 0x0, product version: 138477576, kernel load address: 0x0, kernel entry point: 0x80002000, kernel offset: 3932160, kernel length: 512, rootfs offset: 815037, rootfs length: 1048576, bootloader offset: 2883584, bootloader length: 0
+512           0x200           LZMA compressed data, properties: 0x5D, dictionary size: 33554432 bytes, uncompressed size: 2325620 bytes
+1048576       0x100000        Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 2366593 bytes, 552 inodes, blocksize: 131072 bytes, created: 2026-07-10 11:35:24
 
