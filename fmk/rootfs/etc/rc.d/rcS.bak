@@ -40,9 +40,7 @@ ifconfig lo 127.0.0.1 up
 # Start Captive Portal & HTTP server on port 8080
 # (delayed to allow wireless interface to initialize)
 #
-
 (sleep 10 && /etc/portal/captive_portal.sh) &
-
 
 echo 524288 > /proc/sys/net/ipv4/ipfrag_high_thresh
 
