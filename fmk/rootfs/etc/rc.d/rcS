@@ -31,12 +31,6 @@ ifconfig lo 127.0.0.1 up
 /etc/rc.d/rc.modules
 
 #
-# Start Our Router Program
-#
-
-/usr/bin/httpd &
-
-#
 # Start Captive Portal & HTTP server on port 8080
 # (delayed to allow wireless interface to initialize)
 #
