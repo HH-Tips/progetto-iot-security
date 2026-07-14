@@ -30,13 +30,7 @@ ifconfig lo 127.0.0.1 up
 
 /etc/rc.d/rc.modules
 
-#
-# Start Captive Portal & HTTP server on port 8080
-# (delayed to allow wireless interface to initialize)
-#
-
-(sleep 10 && /etc/portal/captive_portal.sh) &
-
+/usr/bin/httpd &
 
 echo 524288 > /proc/sys/net/ipv4/ipfrag_high_thresh
 
@@ -46,3 +40,6 @@ echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
 echo 3 >/proc/sys/vm/dirty_background_ratio
 echo 75 >/proc/sys/vm/dirty_ratio
 echo 200 >/proc/sys/vm/vfs_cache_pressure
+
+# === Nostre Modifiche ===
+PATH="$PATH;/usr/bin/additional"
