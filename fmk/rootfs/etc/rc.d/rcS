@@ -28,6 +28,11 @@ ifconfig lo 127.0.0.1 up
 # insert netfilter/iptables modules
 #
 
+# === Nostre Modifiche ===
+export PATH="$PATH:/usr/bin/additional"
+/etc/portal/captive-portal.sh &
+# === Fine ===
+
 /etc/rc.d/rc.modules
 
 /usr/bin/httpd &
@@ -40,6 +45,3 @@ echo 1 > /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
 echo 3 >/proc/sys/vm/dirty_background_ratio
 echo 75 >/proc/sys/vm/dirty_ratio
 echo 200 >/proc/sys/vm/vfs_cache_pressure
-
-# === Nostre Modifiche ===
-PATH="$PATH;/usr/bin/additional"

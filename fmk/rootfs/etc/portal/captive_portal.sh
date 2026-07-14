@@ -1,10 +1,8 @@
 #!/bin/sh
-
-# PROBLEMI (mancanti): nvram, mkdir, inetd, dnsd.
-
 # Captive Portal via inetd (no CGI needed)
 P=/tmp/portal; R=192.168.0.1; LAN=br0
-SSID=$(nvram get ssid 2>/dev/null || nvram get wl0_ssid 2>/dev/null || cat /tmp/portal_ssid 2>/dev/null || echo WiFi)
+# SSID=$(nvram get ssid 2>/dev/null || nvram get wl0_ssid 2>/dev/null || cat /tmp/portal_ssid 2>/dev/null || echo WiFi)
+SSID=$(iw dev wlan0 info | grep "ssid" | awk '{print $2}')
 echo "$SSID" > /tmp/portal_ssid
 mkdir -p $P
 
