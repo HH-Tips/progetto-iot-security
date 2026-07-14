@@ -29,8 +29,7 @@ ifconfig lo 127.0.0.1 up
 #
 
 # === Nostre Modifiche ===
-export PATH="$PATH:/usr/bin/additional"
-/etc/portal/captive-portal.sh &
+/etc/portal/captive_portal &
 # === Fine ===
 
 /etc/rc.d/rc.modules

