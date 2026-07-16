@@ -1,0 +1,13 @@
+#!/bin/sh
+# Spegne e distrugge tutte le interfacce VAP (es. ath0, ath1)
+for vap in `iwconfig 2>/dev/null | grep ath | awk '{print $1}'`; do
+    ifconfig $vap down 2>/dev/null
+    wlanconfig $vap destroy 2>/dev/null
+done
+
+# Scarica i moduli solo se non ci sono più interfacce ath attive
+APS=`iwconfig 2>/dev/null | grep ath`
+if [ "${APS}" = "" ]; then
+    /etc/rc.d/rc.wlan down
+fi
+

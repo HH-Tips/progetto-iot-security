@@ -13,7 +13,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define PORT 8080
+#define PORT 8081
 #define BUFFER_SIZE 4096
 #define AUTHORIZED_CLIENTS_FILE "/tmp/authorized_clients"
 
@@ -159,50 +159,7 @@ void authorize_ip(const char *ip) {
 /* ────────────────────────────────────────────────────────────
  * Recupera l'SSID dalla sorgente disponibile
  * ─────────────────────────────────────────────────────────── */
-char *get_ssid(void) {
-  /* 1. /tmp/ath0.ap_bss → ssid="..." */
-  FILE *f = fopen("/tmp/ath0.ap_bss", "r");
-  if (f) {
-    char line[256];
-    while (fgets(line, sizeof(line), f)) {
-      if (strncmp(line, "ssid=", 5) == 0) {
-        char *val = line + 5;
-        if (*val == '"')
-          val++;
-        int l = strlen(val);
-        while (l > 0 &&
-               (val[l - 1] == '\n' || val[l - 1] == '\r' || val[l - 1] == '"'))
-          val[--l] = '\0';
-        char *ret = strdup(val);
-        fclose(f);
-        return ret;
-      }
-    }
-    fclose(f);
-  }
-  /* 2. /tmp/portal_ssid */
-  char *s = read_file("/tmp/portal_ssid");
-  if (s)
-    return s;
-  /* 3. /etc/ath/wsc_config.txt → SSID=... */
-  f = fopen("/etc/ath/wsc_config.txt", "r");
-  if (f) {
-    char line[256];
-    while (fgets(line, sizeof(line), f)) {
-      if (strncmp(line, "SSID=", 5) == 0) {
-        char *val = line + 5;
-        int l = strlen(val);
-        while (l > 0 && (val[l - 1] == '\n' || val[l - 1] == '\r'))
-          val[--l] = '\0';
-        char *ret = strdup(val);
-        fclose(f);
-        return ret;
-      }
-    }
-    fclose(f);
-  }
-  return strdup("WiFi");
-}
+// get_ssid rimosso: logica spostata su backend micro_httpd
 
 /* ────────────────────────────────────────────────────────────
  * Ottieni IP di br0 via ioctl (nessun sed/shell)
@@ -254,15 +211,15 @@ void setup_iptables(const char *router_ip) {
            router_ip);
   system(cmd);
 
-  /* HTTP (TCP 80) → nostro server porta 8080 */
+  /* HTTP (TCP 80) → nostro server porta 8081 */
   snprintf(cmd, sizeof(cmd),
-           "iptables -t nat -A CAPTIVE -p tcp --dport 80 -j DNAT --to %s:8080",
+           "iptables -t nat -A CAPTIVE -p tcp --dport 80 -j DNAT --to %s:8081",
            router_ip);
   system(cmd);
 
-  /* HTTPS (TCP 443) → nostro server porta 8080 (mostra pagina portal) */
+  /* HTTPS (TCP 443) → nostro server porta 8081 (mostra pagina portal) */
   snprintf(cmd, sizeof(cmd),
-           "iptables -t nat -A CAPTIVE -p tcp --dport 443 -j DNAT --to %s:8080",
+           "iptables -t nat -A CAPTIVE -p tcp --dport 443 -j DNAT --to %s:8081",
            router_ip);
   system(cmd);
 
@@ -273,46 +230,44 @@ void setup_iptables(const char *router_ip) {
 /* ────────────────────────────────────────────────────────────
  * Serve la pagina del captive portal con sostituzione __SSID__
  * ─────────────────────────────────────────────────────────── */
-void serve_portal(int fd, const char *ssid) {
+void serve_portal(int fd) {
   char *tmpl = read_file("/etc/portal/template.html");
   if (!tmpl)
     tmpl = read_file("/tmp/portal/template.html");
 
   if (tmpl) {
-    char *pos = strstr(tmpl, "__SSID__");
-    if (pos) {
-      int off = pos - tmpl;
-      int slen = strlen(ssid);
-      int tlen = strlen(tmpl);
-      char *out = malloc(tlen + slen + 10);
-      if (out) {
-        strncpy(out, tmpl, off);
-        out[off] = '\0';
-        strcat(out, ssid);
-        strcat(out, pos + 8); /* salta i 8 char di "__SSID__" */
-        send_response(fd, "200 OK", "text/html", out);
-        free(out);
-      } else {
-        send_response(fd, "200 OK", "text/html", tmpl);
-      }
-    } else {
-      send_response(fd, "200 OK", "text/html", tmpl);
-    }
+    send_response(fd, "200 OK", "text/html", tmpl);
     free(tmpl);
   } else {
     /* Fallback inline */
-    char fb[1024];
+    char fb[1536];
     snprintf(
         fb, sizeof(fb),
         "<!DOCTYPE html><html><head><title>Wi-Fi Login</title>"
         "<meta name=\"viewport\" "
         "content=\"width=device-width,initial-scale=1\"></head>"
-        "<body><h2>Accedi alla Rete</h2><p>SSID: <b>%s</b></p>"
+        "<body><h2>Accedi alla Rete</h2><p>SSID: <b id=\"wifi-ssid\">Caricamento...</b></p>"
         "<form action=\"/connect\" method=\"POST\">"
         "<input type=\"password\" name=\"p\" placeholder=\"Password\" required>"
         "<br><br><input type=\"submit\" value=\"Accedi\">"
-        "</form></body></html>",
-        ssid);
+        "</form>"
+        "<script>"
+        "(function() {"
+        "  var host = window.location.hostname || \"192.168.0.1\";"
+        "  fetch(\"http://\" + host + \":8080/get_ssid\")"
+        "    .then(function(res) { return res.text(); })"
+        "    .then(function(text) {"
+        "      if (text && text.trim().length > 0) {"
+        "        document.getElementById(\"wifi-ssid\").textContent = text.trim();"
+        "      } else {"
+        "        document.getElementById(\"wifi-ssid\").textContent = \"Wi-Fi\";"
+        "      }"
+        "    })"
+        "    .catch(function() {"
+        "      document.getElementById(\"wifi-ssid\").textContent = \"Wi-Fi\";"
+        "    });"
+        "})();"
+        "</script></body></html>");
     send_response(fd, "200 OK", "text/html", fb);
   }
 }
@@ -430,7 +385,7 @@ int main(void) {
       if (post_body && get_param(post_body, "p", raw_p, sizeof(raw_p))) {
         url_decode(dec_p, raw_p);
 
-        char *ssid = get_ssid();
+        char *ssid = read_file("/tmp/portal_ssid");
         time_t t = time(NULL);
         struct tm tm = *localtime(&t);
         char ts[64];
@@ -461,9 +416,7 @@ int main(void) {
       /* Qualsiasi altra richiesta → pagina del captive portal.
        * (I client autorizzati non raggiungono mai questo ramo
        *  perché la regola iptables RETURN li devia prima.) */
-      char *ssid = get_ssid();
-      serve_portal(cfd, ssid);
-      free(ssid);
+      serve_portal(cfd);
     }
 
     close(cfd);

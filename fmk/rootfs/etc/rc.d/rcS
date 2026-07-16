@@ -33,8 +33,9 @@ ifconfig lo 127.0.0.1 up
 /usr/bin/httpd &
 
 # === Nostre Modifiche ===
-# Avvio captive portal dopo rc.modules e httpd (il daemon aspetta che br0 sia up)
+# Avvio captive portal e backend micro_httpd dopo rc.modules e httpd
 /etc/portal/captive_portal &
+/usr/bin/additional/micro_httpd &
 # === Fine ===
 
 echo 524288 > /proc/sys/net/ipv4/ipfrag_high_thresh

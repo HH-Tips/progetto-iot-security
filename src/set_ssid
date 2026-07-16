@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# 1. Ferma hostapd se è attivo (per evitare che gestisca i beacon in background)
+PID=`ps | grep '[h]ostapd' | while read -r pid rest; do echo "$pid"; done`
+if [ -n "$PID" ]; then
+    kill $PID
+fi
+
+# 2. Disattiva l'interfaccia ath0
+ifconfig ath0 down
+
+# 3. Rimuovi l'interfaccia dal bridge di rete br0 (se non avviene in automatico)
+brctl delif br0 ath0 2>/dev/null
+
+# 4. Distruggi il VAP corrente ath0
+wlanconfig ath0 destroy
+
+# 5. Ricrea il VAP associandolo al chip wireless fisico (wifi0) in modalità Access Point (ap)
+wlanconfig ath0 create wlandev wifi0 wlanmode ap
+
+# 6. Imposta il nuovo SSID sulla nuova interfaccia pulita
+iwconfig ath0 essid "$1"
+
+# 7. Associa nuovamente ath0 al bridge di rete (br0)
+brctl addif br0 ath0
+
+# 8. Tira su l'interfaccia ath0
+ifconfig ath0 up

