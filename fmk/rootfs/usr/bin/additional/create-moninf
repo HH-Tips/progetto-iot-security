@@ -1,0 +1,9 @@
+#!/bin/sh
+IF="$1"
+# Salva lo stato corrente dell'AP
+ifconfig ath0 down
+# Crea l'interfaccia monitor
+wlanconfig "$IF" create wlandev wifi0 wlanmode monitor
+ifconfig "$IF" up
+# Riporta su l'AP
+ifconfig ath0 up
